@@ -11,15 +11,21 @@ namespace Carrot.Benchmarks
 
         public static IDisposable Start()
         {
+            var nw = new Builder()
+                .UseNetwork("benchmark").ReuseIfExist().Build();
             return new RabbitMqBroker(
-                new Builder().UseContainer()
+
+                new Builder()
+                    .UseContainer()
                     .UseImage("rabbitmq:3.8.9-management-alpine")
                     .ExposePort(5672, 5672)
                     .ExposePort(15672, 15672)
                     .Wait("rabbitmq", ReadyProbe)
+                    .UseNetwork(nw)
                     .ReuseIfExists()
-                    .WithName("rabbitmq")
                     .WithEnvironment("NODENAME=rabbit1")
+                    .WithHostName("rabbitmq")
+                    .WithName("rabbitmq")
                     .Build()
                     .Start());
         }

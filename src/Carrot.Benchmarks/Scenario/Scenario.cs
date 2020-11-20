@@ -13,7 +13,7 @@ namespace Carrot.Benchmarks.Scenario
     [SimpleJob(RuntimeMoniker.NetCoreApp50)]
     [HtmlExporter]
     [MemoryDiagnoser]
-    public abstract partial class Scenario
+    public abstract partial class Scenario 
     {
         private readonly IBroker _broker;
         private readonly Exchange _exchange;
@@ -21,7 +21,7 @@ namespace Carrot.Benchmarks.Scenario
         private protected const String QueueName = "queue";
         private protected const String RoutingKey = "routing_key";
         private protected const String ExchangeName = "exchange";
-        private protected const String EndpointUrl = "amqp://guest:guest@localhost:5672/";
+        private protected const String EndpointUrl = "amqp://guest:guest@rabbitmq:5672/";
         private readonly ManualResetEvent _event = new ManualResetEvent(false);
 
         private IDisposable _container;
@@ -33,7 +33,7 @@ namespace Carrot.Benchmarks.Scenario
             _broker.SubscribeByAtLeastOnce(queue, _ => { _.Consumes(new FooConsumer(Count, _event)); });
         }
 
-        [Benchmark(Baseline = true)]
+        [Benchmark]
         public Task RunAsync()
         {
             var connection = _broker.Connect();
