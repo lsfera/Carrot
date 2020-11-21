@@ -1,12 +1,5 @@
 ﻿from mcr.microsoft.com/dotnet/sdk:5.0
 
-#install docker-cli
-RUN curl https://download.docker.com/linux/static/stable/x86_64/docker-19.03.9.tgz | \
-    tar xvz --directory /tmp && mv -v /tmp/docker/docker /usr/local/bin/docker \
-    && chmod +x /usr/local/bin/docker \
-    && rm -rf /tmp/docker
-
-
 # Set environment variables
 ENV NUGET_CREDENTIALPROVIDER_SESSIONTOKENCACHE_ENABLED true
 

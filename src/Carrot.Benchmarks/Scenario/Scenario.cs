@@ -2,18 +2,13 @@
 using System.Threading;
 using System.Threading.Tasks;
 using BenchmarkDotNet.Attributes;
-using BenchmarkDotNet.Jobs;
 using Carrot.Messages;
 
 namespace Carrot.Benchmarks.Scenario
 {
-    [SimpleJob(RuntimeMoniker.Net461, baseline: true)]
-    [SimpleJob(RuntimeMoniker.NetCoreApp31)]
-    [SimpleJob(RuntimeMoniker.NetCoreApp21)]
-    [SimpleJob(RuntimeMoniker.NetCoreApp50)]
-    [HtmlExporter]
-    [MemoryDiagnoser]
-    public abstract partial class Scenario 
+
+    [Config(typeof(CustomConfig))]
+    public abstract class Scenario
     {
         private readonly IBroker _broker;
         private readonly Exchange _exchange;
@@ -23,8 +18,6 @@ namespace Carrot.Benchmarks.Scenario
         private protected const String ExchangeName = "exchange";
         private protected const String EndpointUrl = "amqp://guest:guest@rabbitmq:5672/";
         private readonly ManualResetEvent _event = new ManualResetEvent(false);
-
-        private IDisposable _container;
         
         protected Scenario(IBroker broker, Exchange exchange, Queue queue)
         {
@@ -70,16 +63,5 @@ namespace Carrot.Benchmarks.Scenario
 
         protected abstract OutboundMessage<Foo> BuildMessage(Int32 i);
 
-        [GlobalSetup]
-        public void GlobalSetup()
-        {
-            _container = RabbitMqBroker.Start();
-        }
-
-        [GlobalCleanup]
-        public void GlobalCleanup()
-        {
-            _container.Dispose();
-        }
     }
 }
