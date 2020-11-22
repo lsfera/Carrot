@@ -9,7 +9,7 @@ namespace Carrot.Serialization
     {
         public JsonSerializerSettings Settings { get; } = new JsonSerializerSettings();
 
-        public object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null)
+        public Object Deserialize(ReadOnlyMemory<Byte> body, TypeInfo type, Encoding encoding = null)
         {
             var e = encoding ?? new UTF8Encoding(true);
 #if (NETCOREAPP3_1 || NET5_0)

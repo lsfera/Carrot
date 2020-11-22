@@ -9,9 +9,7 @@ namespace Carrot.Fallback
 
         private NoFallbackStrategy() { }
 
-        public Task<IFallbackApplied> Apply(IOutboundChannel channel, ConsumedMessageBase message)
-        {
-            return Task.FromResult<IFallbackApplied>(new FallbackAppliedSuccessful());
-        }
+        public Task<IFallbackApplied> Apply(IOutboundChannel channel, ConsumedMessageBase message) => 
+            Task.FromResult<IFallbackApplied>(new FallbackAppliedSuccessful());
     }
 }

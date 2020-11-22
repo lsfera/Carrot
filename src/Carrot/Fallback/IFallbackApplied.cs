@@ -4,12 +4,12 @@ namespace Carrot.Fallback
 {
     public interface IFallbackApplied
     {
-        bool Success { get; }
+        Boolean Success { get; }
     }
 
     internal class FallbackAppliedSuccessful : IFallbackApplied
     {
-        public bool Success => true;
+        public Boolean Success => true;
     }
 
     internal class FallbackAppliedFailure : IFallbackApplied
@@ -20,6 +20,6 @@ namespace Carrot.Fallback
         }
 
         public Exception Exception { get; }
-        public bool Success => false;
+        public Boolean Success => false;
     }
 }

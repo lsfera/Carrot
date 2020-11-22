@@ -1,5 +1,4 @@
 using System;
-using System.Collections.Generic;
 using System.Linq;
 using System.Reflection;
 using RabbitMQ.Client;
@@ -21,7 +20,7 @@ namespace Carrot.Tests
             var ctor = assembly
                 .GetType("RabbitMQ.Client.Framing.BasicProperties")
                 .GetConstructors().Single();
-            return (IBasicProperties) ctor.Invoke(new object[0]);
+            return (IBasicProperties) ctor.Invoke(new Object[0]);
         }
     }
     

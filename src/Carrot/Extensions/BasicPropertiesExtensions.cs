@@ -11,10 +11,8 @@ namespace Carrot.Extensions
         internal static ISerializer CreateSerializer(this IBasicProperties source,
                                                      SerializationConfiguration configuration)
         {
-            if (configuration == null)
-                throw new ArgumentNullException(nameof(configuration));
-
-            return configuration.Create(source.ContentTypeOrDefault(SerializationConfiguration.DefaultContentType));
+            Guard.AgainstNull(configuration, nameof(configuration));
+            return configuration.Create(source.ContentTypeOrDefault());
         }
 
         internal static String ContentTypeOrDefault(this IBasicProperties source,
@@ -33,15 +31,11 @@ namespace Carrot.Extensions
             return bytes.Length > 0 ? source.CreateEncoding().GetString(bytes) : @default;
         }
 
-        internal static Encoding CreateEncoding(this IBasicProperties source)
-        {
-            return Encoding.GetEncoding(source.ContentEncodingOrDefault(SerializationConfiguration.DefaultContentEncoding));
-        }
+        internal static Encoding CreateEncoding(this IBasicProperties source) 
+        => Encoding.GetEncoding(source.ContentEncodingOrDefault());
 
         internal static String ContentEncodingOrDefault(this IBasicProperties source,
-                                                        String @default = "UTF-8")
-        {
-            return source.ContentEncoding ?? @default;
-        }
+                                                        String @default = "UTF-8") 
+        => source.ContentEncoding ?? @default;
     }
 }

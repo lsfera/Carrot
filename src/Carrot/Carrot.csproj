@@ -17,7 +17,11 @@
     </PackageReleaseNotes>
     <PackageLicenseUrl>https://raw.githubusercontent.com/naighes/Carrot/master/LICENSE.txt</PackageLicenseUrl>
     <Version>1.2.2</Version>
+    <LangVersion>preview</LangVersion>
   </PropertyGroup>
+    <ItemGroup Condition="'$(TargetFramework)' == 'netstandard2.0' Or '$(TargetFramework)' == 'NET461'">
+      <PackageReference Include="Contrib.Bcl.Ranges" Version="1.0.0" />
+  </ItemGroup>
   <ItemGroup>
     <PackageReference Include="Newtonsoft.Json" Version="10.0.3" />
     <PackageReference Include="RabbitMQ.Client" Version="6.1.0" />

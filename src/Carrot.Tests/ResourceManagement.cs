@@ -18,13 +18,13 @@ namespace Carrot.Tests
             var consumerChannel1 = new Mock<IInboundChannel>();
             var consumer1 = new FakeConsumerBase(consumerChannel1.Object,
                                                  new Mock<IOutboundChannel>().Object,
-                                                 default(Queue),
+                                                 default,
                                                  null,
                                                  null);
             var consumerChannel2 = new Mock<IInboundChannel>();
             var consumer2 = new FakeConsumerBase(consumerChannel2.Object,
                                                  new Mock<IOutboundChannel>().Object,
-                                                 default(Queue),
+                                                 default,
                                                  null,
                                                  null);
             var outboundModel = new Mock<IModel>();

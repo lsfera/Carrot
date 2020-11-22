@@ -1,6 +1,5 @@
 using System;
 using Carrot.Extensions;
-using Carrot.Fallback;
 using RabbitMQ.Client;
 
 namespace Carrot.Messages
@@ -13,10 +12,7 @@ namespace Carrot.Messages
     {
         public readonly Exception Exception;
 
-        internal FailurePublishing(Exception exception)
-        {
-            Exception = exception;
-        }
+        internal FailurePublishing(Exception exception) => Exception = exception;
     }
 
     public class SuccessfulPublishing : IPublishResult
@@ -30,10 +26,8 @@ namespace Carrot.Messages
             Timestamp = timestamp;
         }
 
-        internal static SuccessfulPublishing FromBasicProperties(IBasicProperties properties)
-        {
-            return new SuccessfulPublishing(properties.MessageId, properties.Timestamp.UnixTime);
-        }
+        internal static SuccessfulPublishing FromBasicProperties(IBasicProperties properties) => 
+            new SuccessfulPublishing(properties.MessageId, properties.Timestamp.UnixTime);
     }
 
     #endregion
@@ -56,15 +50,9 @@ namespace Carrot.Messages
             return this;
         }
 
-        internal void NotifyConsumingCompletion()
-        {
-            Results.ForEach(_ => _.NotifyConsumingCompletion());
-        }
+        internal void NotifyConsumingCompletion() => Results.ForEach(_ => _.NotifyConsumingCompletion());
 
-        internal void NotifyConsumingFault(Exception e)
-        {
-            Results.ForEach(_ => _.NotifyConsumingFault(e));
-        }
+        internal void NotifyConsumingFault(Exception e) => Results.ForEach(_ => _.NotifyConsumingFault(e));
     }
 
     public class Success : AggregateConsumingResult
@@ -82,18 +70,14 @@ namespace Carrot.Messages
         protected ConsumingFailureBase(ConsumedMessageBase message,
                                        ConsumedMessage.ConsumingResult[] results,
                                        params Exception[] exceptions)
-            : base(message, results)
-        {
-            _exceptions = exceptions;
-        }
+            : base(message, results) => _exceptions = exceptions;
 
-        internal Exception[] Exceptions => _exceptions ?? new Exception[] { };
+        internal Exception[] Exceptions => _exceptions ?? Array.Empty<Exception>();
 
         internal void WithErrors(Action<Exception> action)
         {
-            if (action == null)
-                throw new ArgumentNullException(nameof(action));
-
+            Guard.AgainstNull(action, nameof(action));
+           
             Exceptions.NotNull()
                       .ForEach(action);
         }
@@ -109,10 +93,8 @@ namespace Carrot.Messages
         }
 
         internal override AggregateConsumingResult Reply(IInboundChannel inboundChannel,
-                                                         IOutboundChannel outboundChannel)
-        {
-            return this;
-        }
+                                                         IOutboundChannel outboundChannel) =>
+            this;
     }
 
     public class ConsumingFailure : ConsumingFailureBase

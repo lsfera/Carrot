@@ -15,15 +15,10 @@ namespace Carrot.Messages
         internal override Object Content => null;
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
-                                                                      IOutboundChannel outboundChannel)
-        {
-            return Task.FromResult<AggregateConsumingResult>(Result(new ConsumedMessage.ConsumingResult[] { }));
-        }
+                                                                      IOutboundChannel outboundChannel) 
+        => Task.FromResult<AggregateConsumingResult>(Result(Array.Empty<ConsumedMessage.ConsumingResult>()));
 
-        internal override Boolean Match(Type type)
-        {
-            return false;
-        }
+        internal override Boolean Match(Type type) => false;
 
         protected abstract ConsumingFailureBase Result(ConsumedMessage.ConsumingResult[] results);
     }

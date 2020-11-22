@@ -12,19 +12,22 @@ namespace Carrot.Extensions
         {
             var result = task.Result;
 
-            if (result is ConsumingFailureBase)
+            switch (result)
             {
-                if (result is CorruptedMessageConsumingFailure)
+                case CorruptedMessageConsumingFailure _:
                     log.Error("message content corruption detected");
-                else if (result is UnresolvedMessageConsumingFailure)
+                    break;
+                case UnresolvedMessageConsumingFailure _:
                     log.Error("runtime type cannot be resolved");
-                else if (result is UnsupportedMessageConsumingFailure)
+                    break;
+                case UnsupportedMessageConsumingFailure _:
                     log.Error("message type cannot be resolved");
-
-                ((ConsumingFailureBase)result).WithErrors(_ => log.Error("consuming error",
-                                                                         _.GetBaseException()));
+                    break; 
+                case ConsumingFailureBase consumingFailureBase: 
+                    consumingFailureBase.WithErrors(_ => log.Error("consuming error",
+                        _.GetBaseException()));
+                    break;
             }
-
             return result;
         }
 
@@ -34,8 +37,7 @@ namespace Carrot.Extensions
         {
             try
             {
-                var context = new ConsumingContext(message, outboundChannel);
-                return consumer.ConsumeAsync(context)
+                return consumer.ConsumeAsync(new ConsumingContext(message, outboundChannel))
                                .ContinueWith(_ =>
                                              {
                                                  if (_.Exception == null)

@@ -1,86 +1,82 @@
 using System;
 using Carrot.Logging;
 using RabbitMQ.Client;
+// ReSharper disable UnusedMember.Global
 
 namespace Carrot.Configuration
 {
     public class EnvironmentConfiguration
     {
-        private IMessageTypeResolver resolver;
+        private IMessageTypeResolver _resolver;
 
-        internal EnvironmentConfiguration()
-        {
-            IdGenerator = new NewGuid();
-            SerializationConfiguration = new SerializationConfiguration();
-        }
+        internal EnvironmentConfiguration() { }
 
         internal Uri EndpointUri { get; private set; }
 
         internal IMessageTypeResolver MessageTypeResolver
         {
-            get => resolver ?? DefaultMessageTypeResolver.Instance;
-            private set => resolver = value;
+            get => _resolver ?? DefaultMessageTypeResolver.Instance;
+            private set => _resolver = value;
         }
 
         internal UInt32 PrefetchSize { get; private set; }
 
         internal UInt16 PrefetchCount { get; private set; }
 
-        internal INewId IdGenerator { get; private set; }
+        internal INewId IdGenerator { get; private set; } =  new NewGuid();
 
         internal ILog Log { get; private set; } = new DefaultLog();
 
-        internal SerializationConfiguration SerializationConfiguration { get; }
+        internal SerializationConfiguration SerializationConfiguration { get; } = new SerializationConfiguration();
 
         internal Func<IModel, EnvironmentConfiguration, IOutboundChannel> OutboundChannelBuilder { get; private set; } = OutboundChannel.Default();
 
         public void Endpoint(Uri uri)
         {
-            EndpointUri = uri ?? throw new ArgumentNullException(nameof(uri));
+            Guard.AgainstNull(uri, nameof(uri));
+            EndpointUri = uri;
         }
 
         public void ResolveMessageTypeBy(IMessageTypeResolver messageTypeResolver)
         {
-            MessageTypeResolver = messageTypeResolver ?? throw new ArgumentNullException(nameof(messageTypeResolver));
+            Guard.AgainstNull(messageTypeResolver, nameof(messageTypeResolver));
+            MessageTypeResolver = messageTypeResolver;
         }
 
         public void SetPrefetchSize(UInt32 value)
         {
-            if (value <= 0)
-                throw new ArgumentOutOfRangeException(nameof(value));
-
+            if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
             PrefetchSize = value;
         }
 
         public void SetPrefetchCount(UInt16 value)
         {
-            if (value <= 0)
-                throw new ArgumentOutOfRangeException(nameof(value));
-
+            if (value <= 0) throw new ArgumentOutOfRangeException(nameof(value));
             PrefetchCount = value;
         }
 
         public void GeneratesMessageIdBy(INewId instance)
         {
-            IdGenerator = instance ?? throw new ArgumentNullException(nameof(instance));
+            Guard.AgainstNull(instance, nameof(instance));
+            IdGenerator = instance;
         }
-
+            
         public void LogBy(ILog log)
         {
-            Log = log ?? throw new ArgumentNullException(nameof(log));
+            Guard.AgainstNull(log, nameof(log));
+            Log = log;
         }
 
         public void ConfigureSerialization(Action<SerializationConfiguration> configure)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
+            Guard.AgainstNull(configure, nameof(configure));
             configure(SerializationConfiguration);
         }
 
         public void PublishBy(Func<IModel, EnvironmentConfiguration, IOutboundChannel> builder)
         {
-            OutboundChannelBuilder = builder ?? throw new ArgumentNullException(nameof(builder));
+            Guard.AgainstNull(builder, nameof(builder));
+            OutboundChannelBuilder = builder;
         }
     }
 }

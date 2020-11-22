@@ -9,10 +9,7 @@ namespace Carrot.Messages
     {
         internal readonly BasicDeliverEventArgs Args;
 
-        protected internal ConsumedMessageBase(BasicDeliverEventArgs args)
-        {
-            Args = args;
-        }
+        protected internal ConsumedMessageBase(BasicDeliverEventArgs args) => Args = args;
 
         internal abstract Object Content { get; }
 
@@ -21,7 +18,7 @@ namespace Carrot.Messages
 
         internal ConsumedMessage<TMessage> To<TMessage>() where TMessage : class
         {
-            if (!(Content is TMessage content))
+            if (Content is not TMessage content)
                 throw new InvalidCastException($"cannot cast '{Content.GetType()}' to '{typeof(TMessage)}'");
 
             return new ConsumedMessage<TMessage>(content,
@@ -31,14 +28,8 @@ namespace Carrot.Messages
 
         internal abstract Boolean Match(Type type);
 
-        internal void Acknowledge(IInboundChannel channel)
-        {
-            channel.Acknowledge(Args.DeliveryTag);
-        }
+        internal void Acknowledge(IInboundChannel channel) => channel.Acknowledge(Args.DeliveryTag);
 
-        internal void Requeue(IInboundChannel inboundChannel)
-        {
-            inboundChannel.NegativeAcknowledge(Args.DeliveryTag, true);
-        }
+        internal void Requeue(IInboundChannel inboundChannel) => inboundChannel.NegativeAcknowledge(Args.DeliveryTag, true);
     }
 }

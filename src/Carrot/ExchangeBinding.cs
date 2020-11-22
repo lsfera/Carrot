@@ -22,58 +22,27 @@ namespace Carrot
             _arguments = arguments ?? new Dictionary<String, Object>();
         }
 
-        public static Boolean operator ==(ExchangeBinding left, ExchangeBinding right)
-        {
-            return Equals(left, right);
-        }
+        public static Boolean operator ==(ExchangeBinding left, ExchangeBinding right) => Equals(left, right);
 
-        public static Boolean operator !=(ExchangeBinding left, ExchangeBinding right)
-        {
-            return !Equals(left, right);
-        }
+        public static Boolean operator !=(ExchangeBinding left, ExchangeBinding right) => !Equals(left, right);
 
         public Boolean Equals(ExchangeBinding other)
-        {
-            if (ReferenceEquals(null, other))
-                return false;
+        => other is not null && 
+           (ReferenceEquals(this, other) || _exchange == other._exchange &&
+                                            _queue == other._queue &&
+                                            String.Equals(_routingKey, other._routingKey)
+            );
 
-            if (ReferenceEquals(this, other))
-                return true;
+        public override Boolean Equals(Object obj) 
+        => obj is not null && 
+           (ReferenceEquals(this, obj) || obj is ExchangeBinding other && Equals(other));
 
-            return _exchange == other._exchange &&
-                   _queue == other._queue &&
-                   String.Equals(_routingKey, other._routingKey);
-        }
+        public override Int32 GetHashCode() => HashCode.Combine(_exchange, _queue, _routingKey);
 
-        public override Boolean Equals(Object obj)
-        {
-            if (ReferenceEquals(null, obj))
-                return false;
-
-            if (ReferenceEquals(this, obj))
-                return true;
-
-            var other = obj as ExchangeBinding;
-            return other != null && Equals(other);
-        }
-
-        public override Int32 GetHashCode()
-        {
-            unchecked
-            {
-                var hashCode = _exchange.GetHashCode();
-                hashCode = (hashCode * 397) ^ _queue.GetHashCode();
-                hashCode = (hashCode * 397) ^ _routingKey.GetHashCode();
-                return hashCode;
-            }
-        }
-
-        internal void Declare(IModel model)
-        {
-            model.QueueBind(_queue.Name,
+        internal void Declare(IModel model) 
+        => model.QueueBind(_queue.Name,
                             _exchange.Name,
                             _routingKey,
                             _arguments);
-        }
     }
 }

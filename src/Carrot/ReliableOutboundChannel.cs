@@ -30,10 +30,8 @@ namespace Carrot
         
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                     Exchange exchange,
-                                                                    String routingKey)
-        {
-            return PublishAsync(source, exchange.Name, routingKey);
-        }
+                                                                    String routingKey) 
+        => PublishAsync(source, exchange.Name, routingKey);
 
         public override Task<IPublishResult> PublishAsync<TMessage>(OutboundMessage<TMessage> source,
                                                                     String exchange,
@@ -55,8 +53,7 @@ namespace Carrot
             }
             catch (Exception exception)
             {
-                Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
-                _confirms.TryRemove(tag, out tuple);
+                _confirms.TryRemove(tag, out _);
                 tcs.TrySetException(exception);
             }
 
@@ -73,19 +70,15 @@ namespace Carrot
             Model.BasicNacks -= OnModelBasicNacks;
         }
 
-        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args)
-        {
-            HandleServerResponse(args.DeliveryTag,
-                                 args.Multiple,
-                                 (_, source) => _.TrySetException(new NegativeAcknowledgeException(source, "publish was NACK-ed")));
-        }
+        protected virtual void OnModelBasicNacks(Object sender, BasicNackEventArgs args) 
+        => HandleServerResponse(args.DeliveryTag,
+                args.Multiple,
+                (_, source) => _.TrySetException(new NegativeAcknowledgeException(source, "publish was NACK-ed")));
 
-        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args)
-        {
-            HandleServerResponse(args.DeliveryTag,
-                                 args.Multiple,
-                                 (_, source) => _.TrySetResult(true));
-        }
+        protected virtual void OnModelBasicAcks(Object sender, BasicAckEventArgs args) 
+        => HandleServerResponse(args.DeliveryTag,
+                args.Multiple,
+                (_, source) => _.TrySetResult(true));
 
         protected override void OnModelShutdown(Object sender, ShutdownEventArgs args)
         {
@@ -110,10 +103,9 @@ namespace Carrot
 
             foreach (var tag in tags)
             {
-                var confirm = _confirms[tag];
-                action(confirm.Item1, confirm.Item2);
-                Tuple<TaskCompletionSource<Boolean>, IMessage> tuple;
-                _confirms.TryRemove(tag, out tuple);
+                var (taskCompletionSource, message) = _confirms[tag];
+                action(taskCompletionSource, message);
+                _confirms.TryRemove(tag, out _);
             }
         }
     }

@@ -4,7 +4,7 @@ using RabbitMQ.Client;
 
 namespace Carrot
 {
-    public struct Queue
+    public readonly struct Queue
     {
         public readonly String Name;
         internal readonly Boolean IsDurable;
@@ -14,46 +14,27 @@ namespace Carrot
                        Boolean isDurable = false,
                        IDictionary<String, Object> arguments = null)
         {
-            Name = name ?? throw new ArgumentNullException(nameof(name));
+            Guard.AgainstNull(name, nameof(name));
+            Name = name;
             IsDurable = isDurable;
             Arguments = arguments ?? new Dictionary<String, Object>();
         }
 
-        public static Boolean operator ==(Queue left, Queue right)
-        {
-            return left.Equals(right);
-        }
+        public static Boolean operator ==(Queue left, Queue right) => left.Equals(right);
 
-        public static Boolean operator !=(Queue left, Queue right)
-        {
-            return !left.Equals(right);
-        }
+        public static Boolean operator !=(Queue left, Queue right) => !left.Equals(right);
 
-        public Boolean Equals(Queue other)
-        {
-            return String.Equals(Name, other.Name);
-        }
+        private Boolean Equals(Queue other) => String.Equals(Name, other.Name);
 
-        public override Boolean Equals(Object obj)
-        {
-            if (ReferenceEquals(null, obj))
-                return false;
+        public override Boolean Equals(Object obj) => obj is not null && obj is Queue queue && Equals(queue);
 
-            return obj is Queue queue && Equals(queue);
-        }
+        public override Int32 GetHashCode() => Name.GetHashCode();
 
-        public override Int32 GetHashCode()
-        {
-            return Name.GetHashCode();
-        }
-
-        internal void Declare(IModel model)
-        {
-            model.QueueDeclare(Name,
-                               IsDurable,
-                               false,
-                               false,
-                               Arguments);
-        }
+        internal void Declare(IModel model) 
+        => model.QueueDeclare(Name,
+                IsDurable,
+                false,
+                false,
+                Arguments);
     }
 }

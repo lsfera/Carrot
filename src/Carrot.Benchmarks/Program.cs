@@ -42,7 +42,7 @@ namespace Carrot.Benchmarks
             return queue;
         }
 
-        private static void Main()
+        private static void Main(String[] args)
         {
             var writer = BuildWriter();
             var brokers = new Dictionary<String, IBroker>

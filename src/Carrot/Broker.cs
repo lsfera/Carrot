@@ -25,20 +25,15 @@ namespace Carrot
             _connectionBuilder = connectionBuilder;
         }
 
-        public static IBroker New(Action<EnvironmentConfiguration> configure)
-        {
-            return New(configure, new ConnectionBuilder(new DateTimeProvider()));
-        }
+        public static IBroker New(Action<EnvironmentConfiguration> configure) 
+        => New(configure, new ConnectionBuilder(new DateTimeProvider()));
 
         public static IBroker New(Action<EnvironmentConfiguration> configure,
                                   IConnectionBuilder connectionBuilder)
         {
-            if (configure == null)
-                throw new ArgumentNullException(nameof(configure));
-
-            if (connectionBuilder == null)
-                throw new ArgumentNullException(nameof(connectionBuilder));
-
+            Guard.AgainstNull(configure, nameof(configure));
+            Guard.AgainstNull(connectionBuilder, nameof(connectionBuilder));
+            
             var configuration = new EnvironmentConfiguration();
             configure(configuration);
             return new Broker(configuration, connectionBuilder);
@@ -46,83 +41,56 @@ namespace Carrot
 
         public Queue DeclareQueue(String name,
                                   IDictionary<String, Object> arguments = null)
-        {
-            return DeclareQueue(name, false, arguments);
-        }
+        => DeclareQueue(name, false, arguments);
 
         public Queue DeclareDurableQueue(String name,
                                          IDictionary<String, Object> arguments = null)
-        {
-            return DeclareQueue(name, true, arguments);
-        }
+        => DeclareQueue(name, true, arguments);
 
         public Exchange DeclareDirectExchange(String name,
                                               IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "direct", false, arguments);
-        }
+        => DeclareExchange(name, "direct", false, arguments);
 
         public Exchange DeclareDurableDirectExchange(String name,
                                                      IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "direct", true, arguments);
-        }
+        => DeclareExchange(name, "direct", true, arguments);
 
         public Exchange DeclareFanoutExchange(String name,
                                               IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "fanout", false, arguments);
-        }
+        => DeclareExchange(name, "fanout", false, arguments);
 
         public Exchange DeclareDurableFanoutExchange(String name,
                                                      IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "fanout", true, arguments);
-        }
+        => DeclareExchange(name, "fanout", true, arguments);
 
         public Exchange DeclareTopicExchange(String name,
                                              IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "topic", false, arguments);
-        }
+        => DeclareExchange(name, "topic", false, arguments);
 
         public Exchange DeclareDurableTopicExchange(String name,
                                                     IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "topic", true, arguments);
-        }
+        => DeclareExchange(name, "topic", true, arguments);
 
         public Exchange DeclareHeadersExchange(String name,
-                                               IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "headers", false, arguments);
-        }
+                                               IDictionary<String, Object> arguments = null) 
+        => DeclareExchange(name, "headers", false, arguments);
 
         public Exchange DeclareDurableHeadersExchange(String name,
                                                       IDictionary<String, Object> arguments = null)
-        {
-            return DeclareExchange(name, "headers", true, arguments);
-        }
+        => DeclareExchange(name, "headers", true, arguments);
 
         public void DeclareExchangeBinding(Exchange exchange,
                                            Queue queue,
                                            String routingKey = "",
                                            IDictionary<String, Object> arguments = null)
         {
-            if (exchange == null)
-                throw new ArgumentNullException(nameof(exchange));
-
-            if (queue == null)
-                throw new ArgumentNullException(nameof(queue));
-
-            if (routingKey == null)
-                throw new ArgumentNullException(nameof(routingKey));
+            Guard.AgainstNull(routingKey, nameof(routingKey));
 
             if (!_bindings.Add(new ExchangeBinding(exchange,
                                                    queue,
                                                    routingKey,
                                                    arguments)))
-                throw new ArgumentException("dupicate binding detected");
+                throw new ArgumentException("duplicate binding detected");
         }
 
         public Boolean TryDeclareExchangeBinding(Exchange exchange,
@@ -130,12 +98,8 @@ namespace Carrot
                                                  String routingKey = "",
                                                  IDictionary<String, Object> arguments = null)
         {
-            if (queue == null)
-                throw new ArgumentNullException(nameof(queue));
-
-            if (routingKey == null)
-                throw new ArgumentNullException(nameof(routingKey));
-
+            Guard.AgainstNull(routingKey, nameof(routingKey));
+            
             return _bindings.Add(new ExchangeBinding(exchange,
                                                      queue,
                                                      routingKey,
@@ -152,19 +116,15 @@ namespace Carrot
             return CreateConnection(connection, outboundModel);
         }
 
-        public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure)
-        {
-            Subscribe(configure,
-                      (b, c) => new AtMostOnceConsumingPromise(queue, b, c, () => _configuration.Log),
-                      queue);
-        }
+        public void SubscribeByAtMostOnce(Queue queue, Action<ConsumingConfiguration> configure) 
+        => Subscribe(configure,
+                (b, c) => new AtMostOnceConsumingPromise(queue, b, c, () => _configuration.Log),
+                queue);
 
-        public void SubscribeByAtLeastOnce(Queue queue, Action<ConsumingConfiguration> configure)
-        {
-            Subscribe(configure,
-                      (b, c) => new AtLeastOnceConsumingPromise(queue, b, c, () => _configuration.Log),
-                      queue);
-        }
+        public void SubscribeByAtLeastOnce(Queue queue, Action<ConsumingConfiguration> configure) 
+        => Subscribe(configure,
+                (b, c) => new AtLeastOnceConsumingPromise(queue, b, c, () => _configuration.Log),
+                queue);
 
         protected internal virtual IModel CreateInboundModel(RabbitMQ.Client.IConnection connection,
                                                              UInt32 prefetchSize,

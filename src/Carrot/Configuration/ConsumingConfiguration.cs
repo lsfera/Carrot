@@ -22,9 +22,7 @@ namespace Carrot.Configuration
 
         public void FallbackBy(Func<IBroker, Queue, IFallbackStrategy> strategy)
         {
-            if (strategy == null)
-                throw new ArgumentNullException(nameof(strategy));
-
+            Guard.AgainstNull(strategy, nameof(strategy));
             FallbackStrategy = strategy(_broker, _queue);
         }
 
@@ -38,10 +36,8 @@ namespace Carrot.Configuration
             _subscriptions[type].Add(consumer);
         }
 
-        internal IEnumerable<IConsumer> FindSubscriptions(ConsumedMessageBase message)
-        {
-            return _subscriptions.Where(_ => message.Match(_.Key))
-                                 .SelectMany(_ => _.Value);
-        }
+        internal IEnumerable<IConsumer> FindSubscriptions(ConsumedMessageBase message) =>
+            _subscriptions.Where(_ => message.Match(_.Key))
+                .SelectMany(_ => _.Value);
     }
 }

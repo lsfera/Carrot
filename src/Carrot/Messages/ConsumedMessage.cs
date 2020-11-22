@@ -19,18 +19,13 @@ namespace Carrot.Messages
 
         internal override Object Content { get; }
 
-        internal override Boolean Match(Type type)
-        {
-            return Content != null && type.GetTypeInfo().IsInstanceOfType(Content);
-        }
+        internal override Boolean Match(Type type) => Content != null && type.GetTypeInfo().IsInstanceOfType(Content);
 
         internal override Task<AggregateConsumingResult> ConsumeAsync(IEnumerable<IConsumer> subscriptions,
-                                                                      IOutboundChannel outboundChannel)
-        {
-            return Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this,
-                                                                             outboundChannel)))
-                       .ContinueWith(AggregateResult, TaskContinuationOptions.RunContinuationsAsynchronously);
-        }
+                                                                      IOutboundChannel outboundChannel) =>
+            Task.WhenAll(subscriptions.Select(_ => _.SafeConsumeAsync(this,
+                    outboundChannel)))
+                .ContinueWith(AggregateResult, TaskContinuationOptions.RunContinuationsAsynchronously);
 
         private AggregateConsumingResult BuildErrorResult(IEnumerable<ConsumingResult> results)
         {
@@ -45,12 +40,10 @@ namespace Carrot.Messages
             return new ConsumingFailure(this, consumingResults, exceptions);
         }
 
-        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task)
-        {
-            return task.Result.OfType<Failure>().Any()
-                       ? BuildErrorResult(task.Result)
-                       : new Messages.Success(this, task.Result);
-        }
+        private AggregateConsumingResult AggregateResult(Task<ConsumingResult[]> task) =>
+            task.Result.OfType<Failure>().Any()
+                ? BuildErrorResult(task.Result)
+                : new Messages.Success(this, task.Result);
 
         public abstract class ConsumingResult
         {
@@ -63,15 +56,9 @@ namespace Carrot.Messages
                 Consumer = consumer;
             }
 
-            internal void NotifyConsumingCompletion()
-            {
-                Consumer.OnConsumeCompletion();
-            }
+            internal void NotifyConsumingCompletion() => Consumer.OnConsumeCompletion();
 
-            internal void NotifyConsumingFault(Exception e)
-            {
-                Consumer.OnError(e);
-            }
+            internal void NotifyConsumingFault(Exception e) => Consumer.OnError(e);
         }
 
         internal class Failure : ConsumingResult
@@ -79,10 +66,8 @@ namespace Carrot.Messages
             internal readonly Exception Exception;
 
             internal Failure(ConsumedMessageBase message, IConsumer consumer, Exception exception)
-                : base(message, consumer)
-            {
+                : base(message, consumer) =>
                 Exception = exception;
-            }
         }
 
         internal class Success : ConsumingResult

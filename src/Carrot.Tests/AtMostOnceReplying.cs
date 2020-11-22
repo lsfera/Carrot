@@ -14,7 +14,7 @@ namespace Carrot.Tests
 
         public AtMostOnceReplying()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
+            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default);
         }
 
         [Fact]
@@ -26,7 +26,7 @@ namespace Carrot.Tests
             var builder = new Mock<IConsumedMessageBuilder>();
             var consumer = new AtMostOnceConsumerWrapper(inboundChannel.Object,
                                                          new Mock<IOutboundChannel>().Object,
-                                                         default(Queue),
+                                                         default,
                                                          builder.Object,
                                                          _configuration);
             var args = new BasicDeliverEventArgs

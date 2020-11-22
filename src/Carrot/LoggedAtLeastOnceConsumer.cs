@@ -28,11 +28,9 @@ namespace Carrot
         }
 
         protected internal override Task<AggregateConsumingResult> ConsumeAsync(BasicDeliverEventArgs args,
-                                                                                IOutboundChannel outboundChannel)
-        {
-            return base.ConsumeAsync(args, outboundChannel)
-                       .ContinueWith(_ => _.HandleErrorResult(_log), TaskContinuationOptions.RunContinuationsAsynchronously);
-        }
+                                                                                IOutboundChannel outboundChannel) 
+        => base.ConsumeAsync(args, outboundChannel)
+                .ContinueWith(_ => _.HandleErrorResult(_log), TaskContinuationOptions.RunContinuationsAsynchronously);
 
         protected override void OnUnhandledException(AggregateException exception)
         {

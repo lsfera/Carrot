@@ -15,7 +15,7 @@ namespace Carrot.Tests
 
         public AtLeastOnceReplying()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
+            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default);
         }
 
         [Fact]
@@ -94,12 +94,12 @@ namespace Carrot.Tests
             var builder = new Mock<IConsumedMessageBuilder>();
             builder.Setup(_ => _.Build(It.IsAny<BasicDeliverEventArgs>())).Returns(message);
 
-            var configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
+            var configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default);
             configuration.Consumes(realConsumer.Object);
 
             var failingInboundChannel = new FailingInboundChannel(expectedException);
 
-            var consumer = new AtLeastOnceConsumerWrapper(failingInboundChannel, new Mock<IOutboundChannel>().Object, default(Queue), builder.Object, configuration);
+            var consumer = new AtLeastOnceConsumerWrapper(failingInboundChannel, new Mock<IOutboundChannel>().Object, default, builder.Object, configuration);
             await consumer.CallConsumeInternal(args);
 
             realConsumer.Verify(_ => _.OnError(expectedException));
@@ -120,7 +120,7 @@ namespace Carrot.Tests
             var channel = new Mock<IInboundChannel>();
             var consumer = new AtLeastOnceConsumerWrapper(channel.Object,
                                                           new Mock<IOutboundChannel>().Object,
-                                                          default(Queue),
+                                                          default,
                                                           builder.Object,
                                                           configuration);
             consumer.CallConsumeInternal(args).Wait();
@@ -183,12 +183,12 @@ namespace Carrot.Tests
                 
             }
 
-            public void Acknowledge(ulong deliveryTag)
+            public void Acknowledge(UInt64 deliveryTag)
             {
                 throw _exception;
             }
 
-            public void NegativeAcknowledge(ulong deliveryTag, bool requeue)
+            public void NegativeAcknowledge(UInt64 deliveryTag, Boolean requeue)
             {
                 throw _exception;
             }

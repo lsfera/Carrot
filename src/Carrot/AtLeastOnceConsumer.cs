@@ -58,10 +58,8 @@ namespace Carrot
                                               TaskContinuationOptions.RunContinuationsAsynchronously)
                                 .ContinueWith(t =>
                                               {
-                                                  var exception = t.Exception?.GetBaseException();
-
-                                                  if (exception != null)
-                                                      failureResult.NotifyConsumingFault(exception);
+                                                  if(t.Exception is Exception exception)
+                                                      failureResult.NotifyConsumingFault(exception.GetBaseException());
                                                   else
                                                       failureResult.NotifyConsumingCompletion();
 

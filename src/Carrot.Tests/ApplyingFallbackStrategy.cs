@@ -16,7 +16,7 @@ namespace Carrot.Tests
 
         public ApplyingFallbackStrategy()
         {
-            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default(Queue));
+            _configuration = new ConsumingConfiguration(new Mock<IBroker>().Object, default);
         }
 
         [Fact]
@@ -32,7 +32,7 @@ namespace Carrot.Tests
             var outboundChannel = new Mock<IOutboundChannel>().Object;
             var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
                                                    outboundChannel,
-                                                   default(Queue),
+                                                   default,
                                                    builder.Object,
                                                    _configuration);
 
@@ -57,7 +57,7 @@ namespace Carrot.Tests
             var outboundChannel = new Mock<IOutboundChannel>().Object;
             var consumer = new AtLeastOnceConsumer(inboundChannel.Object,
                                                    outboundChannel,
-                                                   default(Queue),
+                                                   default,
                                                    builder.Object,
                                                    _configuration);
 
@@ -83,7 +83,7 @@ namespace Carrot.Tests
             var outboundChannel = new Mock<IOutboundChannel>().Object;
             var consumer = new AtLeastOnceConsumerWrapper(inboundChannel.Object,
                                                           outboundChannel,
-                                                          default(Queue),
+                                                          default,
                                                           builder.Object,
                                                           _configuration);
 
@@ -109,7 +109,7 @@ namespace Carrot.Tests
                 .ReturnsAsync(new FallbackAppliedFailure(new Exception()));
             var consumer = new AtLeastOnceConsumerWrapper(inboundChannel.Object,
                 outboundChannel.Object,
-                default(Queue),
+                default,
                 builder.Object,
                 _configuration);
 
@@ -119,14 +119,14 @@ namespace Carrot.Tests
             outboundChannel
                 .Verify(c =>
                     c.PublishAsync(It.IsAny<OutboundMessage<FakeConsumedMessage>>(), It.IsAny<Exchange>(),
-                        It.IsAny<string>()), Times.Never);
+                        It.IsAny<String>()), Times.Never);
             outboundChannel
                 .Verify(c =>
                     c.PublishAsync(It.IsAny<OutboundMessage<FakeConsumedMessage>>(), It.IsAny<Exchange>(),
-                        It.IsAny<string>()), Times.Never);
+                        It.IsAny<String>()), Times.Never);
             inboundChannel
                 .Verify(c =>
-                    c.NegativeAcknowledge(message.Args.DeliveryTag, It.Is<bool>(boolean => boolean.Equals(true))));
+                    c.NegativeAcknowledge(message.Args.DeliveryTag, It.Is<Boolean>(boolean => boolean.Equals(true))));
         }
 
         [Fact]
@@ -147,7 +147,7 @@ namespace Carrot.Tests
             var outboundChannel = new Mock<IOutboundChannel>();
             outboundChannel.Setup(c =>
                 c.ForwardAsync(message, It.Is<Exchange>(e => e.Name == dleName),
-                    string.Empty)).ReturnsAsync(SuccessfulPublishing.FromBasicProperties(message.Args.BasicProperties));
+                    String.Empty)).ReturnsAsync(SuccessfulPublishing.FromBasicProperties(message.Args.BasicProperties));
 
             var applied = await strategy.Apply(outboundChannel.Object, message);
 
@@ -171,7 +171,7 @@ namespace Carrot.Tests
             var message = new FakeConsumedMessage(null, FakeBasicDeliverEventArgs());
             var outboundChannel = new Mock<IOutboundChannel>();
             outboundChannel
-                .Setup(c => c.ForwardAsync(message, It.Is<Exchange>(e => e.Name == dleName), string.Empty))
+                .Setup(c => c.ForwardAsync(message, It.Is<Exchange>(e => e.Name == dleName), String.Empty))
                 .ReturnsAsync(new FailurePublishing(new Exception()))
                 .Verifiable();
 
@@ -181,7 +181,7 @@ namespace Carrot.Tests
             outboundChannel.Verify();
         }
 
-        private static BasicDeliverEventArgs FakeBasicDeliverEventArgs(bool redelivered = false)
+        private static BasicDeliverEventArgs FakeBasicDeliverEventArgs(Boolean redelivered = false)
         {
             return new BasicDeliverEventArgs
             {

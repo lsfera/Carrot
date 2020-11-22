@@ -12,18 +12,19 @@ namespace Carrot.Serialization
 
     public class ContentNegotiator : IContentNegotiator
     {
-        internal ContentNegotiator() { }
+        internal ContentNegotiator()
+        {
+        }
 
         public SortedSet<MediaTypeHeader> Negotiate(String contentType)
         {
-            if (contentType == null)
-                throw new ArgumentNullException(nameof(contentType));
+            Guard.AgainstNull(contentType, nameof(contentType));
 
-            return new SortedSet<MediaTypeHeader>(contentType.Split(new[] { ',' },
-                                                                    StringSplitOptions.RemoveEmptyEntries)
-                                                             .Select(_ => MediaTypeHeader.Parse(_.Trim()))
-                                                             .OrderByDescending(_ => _.Quality),
-                                                  MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
+            return new SortedSet<MediaTypeHeader>(contentType
+                    .Split(new[] {','}, StringSplitOptions.RemoveEmptyEntries)
+                    .Select(_ => MediaTypeHeader.Parse(_.Trim()))
+                    .OrderByDescending(_ => _.Quality),
+                MediaTypeHeader.MediaTypeHeaderQualityComparer.Instance);
         }
 
         public class MediaTypeHeader : IEquatable<MediaTypeHeader>
@@ -44,61 +45,30 @@ namespace Carrot.Serialization
                 var type = default(MediaType);
                 var quality = DefaultQuality;
 
-                foreach (var s in source.Split(new[] { ';' },
-                                               StringSplitOptions.RemoveEmptyEntries)
-                                        .Select(_ => _.Trim()))
+                foreach (var s in source.Split(new[] {';'}, StringSplitOptions.RemoveEmptyEntries)
+                                              .Select(_ => _.Trim()))
                     if (s.StartsWith("q", StringComparison.Ordinal))
-                        quality = Single.Parse(s.Substring(s.IndexOf('=') + 1)
-                                                .TrimStart(),
-                                               CultureInfo.InvariantCulture);
+                        quality = Single.Parse(s[(s.IndexOf('=') + 1)..].TrimStart(), CultureInfo.InvariantCulture);
                     else if (s.IndexOf('=') == -1)
                         type = MediaType.Parse(s);
 
                 return new MediaTypeHeader(type, quality);
             }
 
-            public static Boolean operator ==(MediaTypeHeader left, MediaTypeHeader right)
-            {
-                return Equals(left, right);
-            }
+            public static Boolean operator ==(MediaTypeHeader left, MediaTypeHeader right) => Equals(left, right);
 
-            public static Boolean operator !=(MediaTypeHeader left, MediaTypeHeader right)
-            {
-                return !Equals(left, right);
-            }
+            public static Boolean operator !=(MediaTypeHeader left, MediaTypeHeader right) => !Equals(left, right);
 
             public Boolean Equals(MediaTypeHeader other)
-            {
-                if (ReferenceEquals(null, other))
-                    return false;
-
-                if (ReferenceEquals(this, other))
-                    return true;
-
-                return MediaType.Equals(other.MediaType);
-            }
+            => other is not null && (ReferenceEquals(this, other) || MediaType.Equals(other.MediaType));
 
             public override Boolean Equals(Object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
+            => obj is not null &&
+               (ReferenceEquals(this, obj) || obj is MediaTypeHeader other && Equals(other));
 
-                if (ReferenceEquals(this, obj))
-                    return true;
+            public override Int32 GetHashCode() => MediaType.GetHashCode();
 
-                var other = obj as MediaTypeHeader;
-                return other != null && Equals(other);
-            }
-
-            public override Int32 GetHashCode()
-            {
-                return MediaType.GetHashCode();
-            }
-
-            public override String ToString()
-            {
-                return $"{MediaType};q={Quality.ToString(CultureInfo.InvariantCulture)}";
-            }
+            public override String ToString() => $"{MediaType};q={Quality.ToString(CultureInfo.InvariantCulture)}";
 
             internal class MediaTypeHeaderQualityComparer : IComparer<MediaTypeHeader>
             {
@@ -108,10 +78,7 @@ namespace Carrot.Serialization
                 {
                 }
 
-                public Int32 Compare(MediaTypeHeader x, MediaTypeHeader y)
-                {
-                    return x.Quality.CompareTo(y.Quality) * -1;
-                }
+                public Int32 Compare(MediaTypeHeader x, MediaTypeHeader y) => x.Quality.CompareTo(y.Quality) * -1;
             }
         }
 
@@ -128,72 +95,38 @@ namespace Carrot.Serialization
                 Prefix = prefix;
             }
 
-            public static Boolean operator ==(RegistrationTree left, RegistrationTree right)
-            {
-                return Equals(left, right);
-            }
+            public static Boolean operator ==(RegistrationTree left, RegistrationTree right) => Equals(left, right);
 
-            public static Boolean operator !=(RegistrationTree left, RegistrationTree right)
-            {
-                return !Equals(left, right);
-            }
+            public static Boolean operator !=(RegistrationTree left, RegistrationTree right) => !Equals(left, right);
 
             public Boolean Equals(RegistrationTree other)
-            {
-                if (ReferenceEquals(null, other))
-                    return false;
-
-                if (ReferenceEquals(this, other))
-                    return true;
-
-                return String.Equals(Prefix, other.Prefix) &&
-                       String.Equals(Name, other.Name) &&
-                       String.Equals(Suffix, other.Suffix);
-            }
+            => other is not null &&
+               (ReferenceEquals(this, other) ||
+                String.Equals(Prefix, other.Prefix) &&
+                String.Equals(Name, other.Name) &&
+                String.Equals(Suffix, other.Suffix));
 
             public override Boolean Equals(Object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
+            => obj is not null &&
+               (ReferenceEquals(this, obj) || obj is RegistrationTree other && Equals(other));
 
-                if (ReferenceEquals(this, obj))
-                    return true;
+            public override Int32 GetHashCode() => HashCode.Combine(Name, Prefix, Suffix);
 
-                var other = obj as RegistrationTree;
-                return other != null && Equals(other);
-            }
-
-            public override Int32 GetHashCode()
-            {
-                unchecked
-                {
-                    return ((Name?.GetHashCode() ?? 0) * 397) ^ 
-                           ((Prefix?.GetHashCode() ?? 0) * 397) ^ 
-                           (Suffix?.GetHashCode() ?? 0);
-                }
-            }
 
             public override String ToString()
-            {
-                return Suffix == null
-                    ? $"{Prefix}{Name}"
-                    : $"{Prefix}{Name}+{Suffix}";
-            }
+            => Suffix == null
+                ? $"{Prefix}{Name}"
+                : $"{Prefix}{Name}+{Suffix}";
 
             internal static RegistrationTree Parse(String source)
-            {
-                return source.StartsWith("vnd.", StringComparison.Ordinal)
-                    ? new VendorTree(ParseName(source, "vnd."), ParseSuffix(source))
-                    : (RegistrationTree)new StandardTree(ParseName(source), ParseSuffix(source));
-            }
+            => source.StartsWith("vnd.", StringComparison.Ordinal)
+                ? new VendorTree(ParseName(source, "vnd."), ParseSuffix(source))
+                : (RegistrationTree) new StandardTree(ParseName(source), ParseSuffix(source));
 
             protected static String ParseSuffix(String source)
-            {
-                const String key = "+";
-                var start = source.IndexOf(key, StringComparison.Ordinal);
-
-                return start == -1 ? null : source.Substring(start + 1);
-            }
+            => source.IndexOf("+", StringComparison.Ordinal) == -1
+                ? null
+                : source[(source.IndexOf("+", StringComparison.Ordinal) + 1)..];
 
             protected static String ParseName(String source, String key = null)
             {
@@ -205,7 +138,7 @@ namespace Carrot.Serialization
                 var start = index + (key?.Length ?? 0);
                 var end = source.IndexOf("+", StringComparison.Ordinal);
 
-                return end == -1 ? source.Substring(start) : source.Substring(start, end - start);
+                return end == -1 ? source[start..] : source[start..end];
             }
         }
 
@@ -240,68 +173,34 @@ namespace Carrot.Serialization
                 RegistrationTree = registrationTree;
             }
 
-            public static Boolean operator ==(MediaType left, MediaType right)
-            {
-                return Equals(left, right);
-            }
+            public static Boolean operator ==(MediaType left, MediaType right) => Equals(left, right);
 
-            public static Boolean operator !=(MediaType left, MediaType right)
-            {
-                return !Equals(left, right);
-            }
+            public static Boolean operator !=(MediaType left, MediaType right) => !Equals(left, right);
 
-            public static implicit operator MediaType(String value)
-            {
-                return Parse(value);
-            }
+            public static implicit operator MediaType(String value) => Parse(value);
 
             public Boolean Equals(MediaType other)
-            {
-                if (ReferenceEquals(null, other))
-                    return false;
-
-                if (ReferenceEquals(this, other))
-                    return true;
-
-                return String.Equals(Type, other.Type) && RegistrationTree.Equals(other.RegistrationTree);
-            }
+            => other is not null && (ReferenceEquals(this, other) ||
+                                         String.Equals(Type, other.Type) &&
+                                         RegistrationTree.Equals(other.RegistrationTree));
 
             public override Boolean Equals(Object obj)
-            {
-                if (ReferenceEquals(null, obj))
-                    return false;
+            => obj is not null && (ReferenceEquals(this, obj) || obj is MediaType other && Equals(other));
 
-                if (ReferenceEquals(this, obj))
-                    return true;
-
-                var other = obj as MediaType;
-                return other != null && Equals(other);
-            }
-
-            public override Int32 GetHashCode()
-            {
-                unchecked
-                {
-                    return (Type.GetHashCode() * 397) ^ RegistrationTree.GetHashCode();
-                }
-            }
+            public override Int32 GetHashCode() => HashCode.Combine(Type, RegistrationTree);
 
             public override String ToString()
-            {
-                return RegistrationTree == null
-                    ? Type
-                    : $"{Type}/{RegistrationTree}";
-            }
+            => RegistrationTree == null
+                ? Type
+                : $"{Type}/{RegistrationTree}";
 
             internal static MediaType Parse(String source)
             {
-                if (source == null)
-                    throw new ArgumentNullException(nameof(source));
+                Guard.AgainstNull(source, nameof(source));
 
-                var strings = source.Split(new[] { '/' },
-                                           StringSplitOptions.RemoveEmptyEntries)
-                                    .Select(_ => _.Trim())
-                                    .ToArray();
+                var strings = source.Split(new[] {'/'}, StringSplitOptions.RemoveEmptyEntries)
+                                           .Select(_ => _.Trim())
+                                           .ToArray();
 
                 return strings.Length <= 1
                     ? new MediaType(source)

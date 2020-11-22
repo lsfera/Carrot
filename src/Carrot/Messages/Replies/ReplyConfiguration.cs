@@ -17,9 +17,6 @@ namespace Carrot.Messages.Replies
 
         public String RoutingKey { get; }
 
-        public override String ToString()
-        {
-            return $"{ExchangeType}://{ExchangeName}/{RoutingKey}";
-        }
+        public override String ToString() => $"{ExchangeType}://{ExchangeName}/{RoutingKey}";
     }
 }

@@ -36,10 +36,7 @@ namespace Carrot.Messages
         {
         }
 
-        internal HeaderCollection(IDictionary<String, Object> dictionary)
-        {
-            InternalDictionary = dictionary;
-        }
+        internal HeaderCollection(IDictionary<String, Object> dictionary) => InternalDictionary = dictionary;
 
         public String MessageId => ValueOrDefault<String>(MessageIdKey);
 
@@ -59,8 +56,7 @@ namespace Carrot.Messages
         {
             get
             {
-                if (key == null)
-                    throw new ArgumentNullException(nameof(key));
+                Guard.AgainstNull(key, nameof(key));
 
                 if (ReservedKeys.Contains(key))
                     throw new InvalidOperationException($"key '{key}' is reserved");
@@ -94,15 +90,11 @@ namespace Carrot.Messages
             return new HeaderCollection(headers);
         }
 
-        private T ValueOrDefault<T>(String key)
-        {
-            return InternalDictionary.ContainsKey(key) ? (T)InternalDictionary[key] : default(T);
-        }
+        private T ValueOrDefault<T>(String key) => InternalDictionary.ContainsKey(key) ? (T)InternalDictionary[key] : default;
 
         internal void AddHeader(String key, Object value)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.AgainstNull(key, nameof(key));
 
             if (ReservedKeys.Contains(key))
                 throw new InvalidOperationException($"key '{key}' is reserved");
@@ -112,8 +104,7 @@ namespace Carrot.Messages
 
         internal void RemoveHeader(String key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.AgainstNull(key, nameof(key));
 
             if (ReservedKeys.Contains(key))
                 throw new InvalidOperationException($"key '{key}' is reserved");
@@ -121,27 +112,23 @@ namespace Carrot.Messages
             InternalDictionary.Remove(key);
         }
 
-        internal IDictionary<String, Object> NonReservedHeaders()
-        {
-            return InternalDictionary.Where(_ => !ReservedKeys.Contains(_.Key))
-                                     .ToDictionary(_ => _.Key, _ => _.Value);
-        }
+        internal IDictionary<String, Object> NonReservedHeaders() =>
+            InternalDictionary.Where(_ => !ReservedKeys.Contains(_.Key))
+                .ToDictionary(_ => _.Key, _ => _.Value);
 
         internal void Set<T>(String key, T value)
         {
-            if (value == null)
-                throw new ArgumentNullException(nameof(value));
+            Guard.AgainstNull(value, nameof(value));
 
-            if (!InternalDictionary.ContainsKey(key))
-                InternalDictionary.Add(key, value);
-            else
+            if (InternalDictionary.ContainsKey(key))
                 InternalDictionary[key] = value;
+            else
+                InternalDictionary.Add(key, value);
         }
 
-        public bool ContainsHeader(String key)
+        public Boolean ContainsHeader(String key)
         {
-            if (key == null)
-                throw new ArgumentNullException(nameof(key));
+            Guard.AgainstNull(key, nameof(key));
 
             if (ReservedKeys.Contains(key))
                 throw new InvalidOperationException($"key '{key}' is reserved");

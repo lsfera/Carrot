@@ -9,9 +9,7 @@ namespace Carrot.Messages
         {
         }
 
-        protected override ConsumingFailureBase Result(ConsumedMessage.ConsumingResult[] results)
-        {
-            return new UnsupportedMessageConsumingFailure(this, results);
-        }
+        protected override ConsumingFailureBase Result(ConsumedMessage.ConsumingResult[] results) 
+        => new UnsupportedMessageConsumingFailure(this, results);
     }
 }

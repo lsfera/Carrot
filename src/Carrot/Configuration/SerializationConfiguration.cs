@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.Linq;
 using Carrot.Serialization;
 
 namespace Carrot.Configuration
@@ -21,31 +22,29 @@ namespace Carrot.Configuration
 
         public void Map(Predicate<ContentNegotiator.MediaTypeHeader> predicate, ISerializer serializer)
         {
-            if (predicate == null)
-                throw new ArgumentNullException(nameof(predicate));
-
-            if (serializer == null)
-                throw new ArgumentNullException(nameof(serializer));
-
+            Guard.AgainstNull(predicate, nameof(predicate));
+            Guard.AgainstNull(serializer, nameof(serializer));
+            
             _serializers.Add(predicate, serializer);
         }
 
         public void NegotiateBy(IContentNegotiator negotiator)
         {
-            _negotiator = negotiator ?? throw new ArgumentNullException(nameof(negotiator));
+            Guard.AgainstNull(negotiator, nameof(negotiator));
+            _negotiator = negotiator;
         }
 
         internal virtual ISerializer Create(String contentType)
         {
-            if (contentType == null)
-                throw new ArgumentNullException(nameof(contentType));
-
+            Guard.AgainstNull(contentType, nameof(contentType));
+            
             var result = _negotiator.Negotiate(contentType);
 
-            foreach (var header in result)
-                foreach (var serializer in _serializers)
-                    if (serializer.Key(header))
-                        return serializer.Value;
+            foreach (var serializer in 
+                from header in result 
+                from serializer in _serializers 
+                    where serializer.Key(header) select serializer)
+                return serializer.Value;
 
             return NullSerializer.Instance;
         }

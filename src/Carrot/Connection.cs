@@ -46,12 +46,10 @@ namespace Carrot
             _connection?.Dispose();
         }
 
-        void OnConnectionShutdown(object connection, ShutdownEventArgs reason)
-        {
-            Cleanup(_connection, reason.ReplyCode, reason.ReplyText);
-        }
+        void OnConnectionShutdown(Object connection, ShutdownEventArgs reason) 
+        => Cleanup(_connection, reason.ReplyCode, reason.ReplyText);
 
-        private void Cleanup(RabbitMQ.Client.IConnection connection, ushort replyCode = 200, string message = "Unknown")
+        private static void Cleanup(RabbitMQ.Client.IConnection connection, UInt16 replyCode = 200, String message = "Unknown")
         {
             if (connection == null) return;
             try

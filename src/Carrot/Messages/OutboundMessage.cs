@@ -26,35 +26,23 @@ namespace Carrot.Messages
 
         public override TMessage Content { get; }
 
-        public void AddHeader(String key, Object value)
-        {
-            Headers.AddHeader(key, value);
-        }
+        public void AddHeader(String key, Object value) 
+        => Headers.AddHeader(key, value);
 
-        public void RemoveHeader(String key)
-        {
-            Headers.RemoveHeader(key);
-        }
+        public void RemoveHeader(String key) 
+        => Headers.RemoveHeader(key);
 
-        public void SetContentEncoding(String value)
-        {
-            Headers.Set(HeaderCollection.ContentEncodingKey, value);
-        }
+        public void SetContentEncoding(String value) 
+        => Headers.Set(HeaderCollection.ContentEncodingKey, value);
 
-        public void SetContentType(String value)
-        {
-            Headers.Set(HeaderCollection.ContentTypeKey, value);
-        }
+        public void SetContentType(String value) 
+        => Headers.Set(HeaderCollection.ContentTypeKey, value);
 
-        public void SetCorrelationId(String correlationId)
-        {
-            Headers.Set(HeaderCollection.CorrelationIdKey, correlationId);
-        }
+        public void SetCorrelationId(String correlationId) 
+        => Headers.Set(HeaderCollection.CorrelationIdKey, correlationId);
 
-        public void SetReply(ReplyConfiguration replyConfiguration)
-        {
-            Headers.Set(HeaderCollection.ReplyConfigurationKey, replyConfiguration);
-        }
+        public void SetReply(ReplyConfiguration replyConfiguration) 
+        => Headers.Set(HeaderCollection.ReplyConfigurationKey, replyConfiguration);
 
         internal virtual IBasicProperties ConfigureBasicProperties(IBasicProperties basicProperties,
                                                                IMessageTypeResolver resolver,
