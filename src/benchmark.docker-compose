@@ -25,7 +25,7 @@ services:
     depends_on:
       - rabbitmq
     restart: "no"
-    entrypoint: ["dotnet", "Carrot.Benchmarks.dll", "-j", "long", "--filter", "*.DurableMessagesScenario.*", "-r", "netcoreapp50", "netcoreapp31", "--profiler", "EP"]
+    entrypoint: ["dotnet", "Carrot.Benchmarks.dll", "--job", "Medium", "--filter", "*.DurableMessagesScenario.*", "--runtimes", "netcoreapp50", "netcoreapp31", "netcoreapp21", "--memory"] #, "--threading", "--profiler", "EP" if runtime > .netcoreapp30
     deploy:
       resources:
         limits:

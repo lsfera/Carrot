@@ -6,8 +6,6 @@ using Carrot.Messages;
 
 namespace Carrot.Benchmarks.Scenario
 {
-
-    [Config(typeof(CustomConfig))]
     public abstract class Scenario
     {
         private readonly IBroker _broker;
