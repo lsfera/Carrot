@@ -5,13 +5,14 @@ using Carrot.Messages;
 
 namespace Carrot.Benchmarks.Scenario
 {
-    public class DurableMessagesScenario : Scenario
+    public class NonDurableReliableScenario : Scenario
     {
-        public DurableMessagesScenario()
+        public NonDurableReliableScenario()
             : base(Bootstrap.broker, Bootstrap.exchange, Bootstrap.queue)
-        { }
+        {
+        }
 
-        private static IBroker BuildBroker =>
+        private static IBroker BuildBroker() =>
             Broker.New(_ =>
             {
                 _.Endpoint(new Uri(EndpointUrl, UriKind.Absolute));
@@ -19,12 +20,12 @@ namespace Carrot.Benchmarks.Scenario
                 _.PublishBy(OutboundChannel.Reliable());
             });
 
-        private static Exchange DeclareExchange(IBroker broker) => broker.DeclareDurableDirectExchange(ExchangeName);
+        private static Exchange DeclareExchange(IBroker broker) => broker.DeclareDirectExchange(ExchangeName);
 
         private static Queue BindQueue(IBroker broker, Exchange exchange)
         {
-            var queue = broker.DeclareDurableQueue(QueueName);
-            broker.DeclareExchangeBinding(exchange, queue, RoutingKey);
+            var queue = broker.DeclareQueue(QueueName);
+            broker.TryDeclareExchangeBinding(exchange, queue, RoutingKey);
             return queue;
         }
 
@@ -32,16 +33,13 @@ namespace Carrot.Benchmarks.Scenario
         {
             get
             {
-                var broker = BuildBroker;
+                var broker = BuildBroker();
                 var exchange = DeclareExchange(broker);
                 var queue = BindQueue(broker, exchange);
                 return (broker, exchange, queue);
             }
         }
-
-        protected override OutboundMessage<Foo> BuildMessage(Int32 i)
-        {
-            return new DurableOutboundMessage<Foo>(new Foo { Bar = i });
-        }
+        
+        protected override OutboundMessage<Foo> BuildMessage(Int32 i) => new OutboundMessage<Foo>(new Foo { Bar = i });
     }
 }

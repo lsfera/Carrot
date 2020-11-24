@@ -1,0 +1,33 @@
+version: '2.4'
+services:
+  rabbitmq:
+    container_name: rabbitmq
+    image: rabbitmq:3.8.9-management-alpine
+    container_name: rabbitmq
+    ports:
+      - "15672:15672"
+      - "5672:5672"
+    healthcheck:
+      test: [ "CMD", "rabbitmq-diagnostics", "check_running"]
+      interval: 5s
+      timeout: 15s
+      retries: 3
+  benchmark:
+    privileged: true
+    container_name: benchmark
+    image: ${DOCKER_REGISTRY-}benchmark
+    build:
+      context: .
+      dockerfile: ./Dockerfile
+    volumes:
+      - ../benchmark-results/:/src/bin/publish/BenchmarkDotNet.Artifacts:rw
+    depends_on:
+      rabbitmq:
+        condition: service_healthy
+    restart: "no"
+    entrypoint: ["dotnet", "Carrot.Benchmarks.dll", "--job", "Medium", "--filter", "*", "--runtimes", "netcoreapp50", "netcoreapp31", "netcoreapp21", "--memory"] #, "--threading", "--profiler", "EP" if runtime > .netcoreapp30
+networks:
+  default:
+    external:
+      name: ${Network}
+  
